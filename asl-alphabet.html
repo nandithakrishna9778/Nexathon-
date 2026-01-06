@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ASL Alphabet</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0a0f2a 0%, #7bbbff 100%);
+            color: #fff;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 20px;
+        }
+
+        .logo {
+            font-size: 1.8em;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 10px;
+            list-style: none;
+        }
+
+        .nav-item {
+            padding: 12px 25px;
+            cursor: pointer;
+            border-radius: 25px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+            font-weight: 500;
+            text-decoration: none;
+            color: white;
+            display: block;
+        }
+
+        .nav-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 20px;
+            margin-bottom: 40px;
+            backdrop-filter: blur(10px);
+        }
+
+        h1 {
+            font-size: 3.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .subtitle {
+            font-size: 1.4em;
+            opacity: 0.9;
+        }
+
+        .section {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .icon {
+            font-size: 1.5em;
+        }
+
+        .alphabet-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .alphabet-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+
+        .alphabet-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: scale(1.1);
+        }
+
+        .alphabet-letter {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .hand-emoji {
+            font-size: 2.5em;
+        }
+
+        .study-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .quiz-container {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 40px;
+            border-radius: 15px;
+            text-align: center;
+        }
+
+        .quiz-letter {
+            font-size: 8em;
+            margin: 30px 0;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.8); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .quiz-input {
+            font-size: 2em;
+            padding: 15px 30px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-align: center;
+            width: 120px;
+            text-transform: uppercase;
+        }
+
+        .quiz-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .quiz-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 35px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #1e3a8a 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .score-display {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-top: 20px;
+            font-size: 1.3em;
+        }
+
+        .score-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .feedback {
+            font-size: 1.5em;
+            margin-top: 20px;
+            min-height: 40px;
+            font-weight: bold;
+        }
+
+        .feedback.correct {
+            color: #4ade80;
+        }
+
+        .feedback.incorrect {
+            color: #f87171;
+        }
+
+        .practice-mode {
+            display: grid;
+            gap: 15px;
+        }
+
+        .mode-btn {
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            color: white;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(10px);
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+
+            .section {
+                padding: 25px;
+            }
+
+            .alphabet-grid {
+                grid-template-columns: repeat(auto-fill, minmax(60px, 1fr));
+            }
+
+            .nav-menu {
+                gap: 5px;
+            }
+
+            .nav-item {
+                padding: 10px 15px;
+                font-size: 0.9em;
+            }
+
+            .logo {
+                font-size: 1.3em;
+            }
+
+            .quiz-letter {
+                font-size: 5em;
+            }
+
+            .quiz-buttons {
+                flex-direction: column;
+            }
+
+            .score-display {
+                flex-direction: column;
+                gap: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">ASL Tech</div>
+            <ul class="nav-menu">
+                <a href="index.html" class="nav-item"> Home</a>
+                <a href="asl-alphabet.html" class="nav-item active"> ASL Alphabet</a>
+                <a href="video-call.html" class="nav-item">Video Call</a>
+                <a href="sign-detection.html" class="nav-item"> Sign Detection</a>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container">
+        <header>
+            <h1><span class="icon"></span> ASL Alphabet</h1>
+            <p class="subtitle">Learn the Manual Alphabet</p>
+        </header>
+
+        <div class="section">
+            <h2><span class="icon"></span> Study Area</h2>
+            <div class="study-area">
+                <div class="practice-mode">
+                    <button class="mode-btn" onclick="startQuiz('emoji')">
+                         Practice: See Emoji, Type Letter
+                    </button>
+                    <button class="mode-btn" onclick="startQuiz('letter')">
+                         Practice: See Letter, Recall Sign
+                    </button>
+                </div>
+
+                <div class="quiz-container" id="quizContainer" style="display: none;">
+                    <div class="quiz-letter" id="quizDisplay"></div>
+                    <input type="text" 
+                           class="quiz-input" 
+                           id="quizInput" 
+                           maxlength="1" 
+                           placeholder="?"
+                           autocomplete="off">
+                    <div class="feedback" id="feedback"></div>
+                    <div class="score-display">
+                        <div class="score-item">
+                            <span> Correct:</span>
+                            <span id="correctCount">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span> Wrong:</span>
+                            <span id="wrongCount">0</span>
+                        </div>
+                        <div class="score-item">
+                            <span> Streak:</span>
+                            <span id="streakCount">0</span>
+                        </div>
+                    </div>
+                    <div class="quiz-buttons">
+                        <button class="btn btn-primary" onclick="checkAnswer()">Check Answer</button>
+                        <button class="btn btn-secondary" onclick="skipQuestion()">Skip</button>
+                        <button class="btn btn-secondary" onclick="endQuiz()">End Practice</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2><span class="icon"></span> Fingerspelling Guide</h2>
+            <p>Learn the manual alphabet - the foundation of ASL fingerspelling. Click any letter to see it highlighted:</p>
+            
+            <div class="alphabet-grid">
+                <div class="alphabet-card" onclick="speakLetter('A')">
+                    <div class="alphabet-letter">A</div>
+                    <div class="hand-emoji">✊</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('B')">
+                    <div class="alphabet-letter">B</div>
+                    <div class="hand-emoji">🖐</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('C')">
+                    <div class="alphabet-letter">C</div>
+                    <div class="hand-emoji">🤏</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('D')">
+                    <div class="alphabet-letter">D</div>
+                    <div class="hand-emoji">👆</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('E')">
+                    <div class="alphabet-letter">E</div>
+                    <div class="hand-emoji">✊</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('F')">
+                    <div class="alphabet-letter">F</div>
+                    <div class="hand-emoji">👌</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('G')">
+                    <div class="alphabet-letter">G</div>
+                    <div class="hand-emoji">👈</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('H')">
+                    <div class="alphabet-letter">H</div>
+                    <div class="hand-emoji">👈</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('I')">
+                    <div class="alphabet-letter">I</div>
+                    <div class="hand-emoji">🤙</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('J')">
+                    <div class="alphabet-letter">J</div>
+                    <div class="hand-emoji">🤙</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('K')">
+                    <div class="alphabet-letter">K</div>
+                    <div class="hand-emoji">✌️</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('L')">
+                    <div class="alphabet-letter">L</div>
+                    <div class="hand-emoji">🤟</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('M')">
+                    <div class="alphabet-letter">M</div>
+                    <div class="hand-emoji">👊</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('N')">
+                    <div class="alphabet-letter">N</div>
+                    <div class="hand-emoji">👊</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('O')">
+                    <div class="alphabet-letter">O</div>
+                    <div class="hand-emoji">👌</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('P')">
+                    <div class="alphabet-letter">P</div>
+                    <div class="hand-emoji">👇</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('Q')">
+                    <div class="alphabet-letter">Q</div>
+                    <div class="hand-emoji">👇</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('R')">
+                    <div class="alphabet-letter">R</div>
+                    <div class="hand-emoji">🤞</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('S')">
+                    <div class="alphabet-letter">S</div>
+                    <div class="hand-emoji">✊</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('T')">
+                    <div class="alphabet-letter">T</div>
+                    <div class="hand-emoji">👊</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('U')">
+                    <div class="alphabet-letter">U</div>
+                    <div class="hand-emoji">✌️</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('V')">
+                    <div class="alphabet-letter">V</div>
+                    <div class="hand-emoji">✌️</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('W')">
+                    <div class="alphabet-letter">W</div>
+                    <div class="hand-emoji">🤟</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('X')">
+                    <div class="alphabet-letter">X</div>
+                    <div class="hand-emoji">☝️</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('Y')">
+                    <div class="alphabet-letter">Y</div>
+                    <div class="hand-emoji">🤙</div>
+                </div>
+                <div class="alphabet-card" onclick="speakLetter('Z')">
+                    <div class="alphabet-letter">Z</div>
+                    <div class="hand-emoji">☝️</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const alphabet = {
+            'A': '✊', 'B': '🖐', 'C': '🤏', 'D': '👆', 'E': '✊', 'F': '👌',
+            'G': '👈', 'H': '👈', 'I': '🤙', 'J': '🤙', 'K': '✌️', 'L': '🤟',
+            'M': '👊', 'N': '👊', 'O': '👌', 'P': '👇', 'Q': '👇', 'R': '🤞',
+            'S': '✊', 'T': '👊', 'U': '✌️', 'V': '✌️', 'W': '🤟', 'X': '☝️',
+            'Y': '🤙', 'Z': '☝️'
+        };
+
+        let quizMode = '';
+        let currentLetter = '';
+        let correct = 0;
+        let wrong = 0;
+        let streak = 0;
+
+        function startQuiz(mode) {
+            quizMode = mode;
+            document.querySelector('.practice-mode').style.display = 'none';
+            document.getElementById('quizContainer').style.display = 'block';
+            correct = 0;
+            wrong = 0;
+            streak = 0;
+            updateScore();
+            nextQuestion();
+            document.getElementById('quizInput').focus();
+        }
+
+        function nextQuestion() {
+            const letters = Object.keys(alphabet);
+            currentLetter = letters[Math.floor(Math.random() * letters.length)];
+            const display = document.getElementById('quizDisplay');
+            
+            if (quizMode === 'emoji') {
+                display.textContent = alphabet[currentLetter];
+            } else {
+                display.textContent = currentLetter;
+            }
+            
+            document.getElementById('quizInput').value = '';
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('feedback').className = 'feedback';
+        }
+
+        function checkAnswer() {
+            const input = document.getElementById('quizInput').value.toUpperCase();
+            const feedback = document.getElementById('feedback');
+            
+            if (!input) {
+                feedback.textContent = 'Please enter a letter!';
+                feedback.className = 'feedback';
+                return;
+            }
+            
+            if (input === currentLetter) {
+                correct++;
+                streak++;
+                feedback.textContent = ' Correct!';
+                feedback.className = 'feedback correct';
+            } else {
+                wrong++;
+                streak = 0;
+                feedback.textContent = ` Wrong! The answer was ${currentLetter}`;
+                feedback.className = 'feedback incorrect';
+            }
+            
+            updateScore();
+            setTimeout(nextQuestion, 1500);
+        }
+
+        function skipQuestion() {
+            streak = 0;
+            updateScore();
+            nextQuestion();
+        }
+
+        function updateScore() {
+            document.getElementById('correctCount').textContent = correct;
+            document.getElementById('wrongCount').textContent = wrong;
+            document.getElementById('streakCount').textContent = streak;
+        }
+
+        function endQuiz() {
+            document.querySelector('.practice-mode').style.display = 'grid';
+            document.getElementById('quizContainer').style.display = 'none';
+            
+            const total = correct + wrong;
+            if (total > 0) {
+                const percentage = Math.round((correct / total) * 100);
+                alert(`Great job! \n\nYou got ${correct} out of ${total} correct (${percentage}%)\nBest streak: ${streak}`);
+            }
+        }
+
+        document.getElementById('quizInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkAnswer();
+            }
+        });
+
+        function speakLetter(letter) {
+            const display = document.createElement('div');
+            display.style.position = 'fixed';
+            display.style.top = '50%';
+            display.style.left = '50%';
+            display.style.transform = 'translate(-50%, -50%)';
+            display.style.background = 'rgba(59, 130, 246, 0.95)';
+            display.style.padding = '40px 60px';
+            display.style.borderRadius = '20px';
+            display.style.fontSize = '4em';
+            display.style.fontWeight = 'bold';
+            display.style.zIndex = '1000';
+            display.style.boxShadow = '0 10px 40px rgba(0,0,0,0.5)';
+            display.textContent = letter;
+            document.body.appendChild(display);
+
+            setTimeout(() => {
+                display.remove();
+            }, 800);
+        }
+    </script>
+</body>
+</html>
