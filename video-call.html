@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Video Call Translation</title>
+    <style>
+        #root { width: 100%; max-width: 1100px; margin: 0 auto; min-height: 70vh; display:flex; align-items:center; justify-content:center; }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg,#0a0f2a 0%,#7bbbff 100%); color:#fff; overflow-x:hidden; min-height:100vh; }
+        .navbar { background: rgba(0,0,0,0.4); backdrop-filter: blur(10px); padding:20px 0; position: sticky; top:0; z-index:100; border-bottom:2px solid rgba(255,255,255,0.1); }
+        .nav-container { max-width:1200px; margin:0 auto; display:flex; justify-content:space-between; align-items:center; padding:0 20px; }
+        .logo { font-size:1.8em; font-weight:bold; display:flex; align-items:center; gap:10px; }
+        .nav-menu { display:flex; gap:10px; list-style:none; }
+        .nav-item { padding:12px 25px; cursor:pointer; border-radius:25px; transition:all 0.3s ease; background:rgba(255,255,255,0.1); font-weight:500; text-decoration:none; color:white; display:block; }
+        .nav-item:hover { background: rgba(255,255,255,0.2); transform: translateY(-2px); }
+        .nav-item.active { background: linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%); box-shadow:0 4px 15px rgba(59,130,246,0.4); }
+        .container { max-width:1200px; margin:0 auto; padding:40px 20px; }
+        header { text-align:center; padding:60px 20px; background: rgba(0,0,0,0.3); border-radius:20px; margin-bottom:40px; backdrop-filter: blur(10px); }
+        h1 { font-size:3.5em; margin-bottom:20px; text-shadow:2px 2px 4px rgba(0,0,0,0.5); }
+        .subtitle { font-size:1.4em; opacity:0.9; }
+        .section { background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); border-radius:20px; padding:40px; margin-bottom:30px; border:1px solid rgba(255,255,255,0.2); }
+        h2 { font-size:2em; margin-bottom:20px; display:flex; align-items:center; gap:15px; }
+        .demo-container { background: rgba(0,0,0,0.4); border-radius:15px; padding:30px; margin-top:20px; }
+        .video-demo { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-top:20px; }
+        .video-box { background:#000; border-radius:10px; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center; position:relative; overflow:hidden; border:3px solid #3b82f6; }
+        .video-placeholder { text-align:center; padding:20px; }
+        .video-label { position:absolute; top:10px; left:10px; background: rgba(59,130,246,0.9); padding:5px 15px; border-radius:20px; font-size:0.9em; font-weight:bold; }
+        .confidence-bar { position:absolute; bottom:10px; left:10px; right:10px; background: rgba(255,255,255,0.2); height:8px; border-radius:4px; overflow:hidden; }
+        .confidence-fill { height:100%; background:#4ade80; width:0%; transition: width 0.3s ease; }
+        .sub { margin-top:16px; width:100%; background: rgba(0,0,0,0.6); border:1px solid rgba(255,255,255,0.15); padding:12px 16px; border-radius:10px; min-height:60px; display:flex; flex-direction:column; justify-content:center; font-size:1.1em; line-height:1.4; }
+        .controls { display:flex; gap:15px; margin-top:20px; flex-wrap:wrap; align-items:center; }
+        button { background: linear-gradient(135deg,#3b82f6 0%,#1e3a8a 100%); color:white; border:none; padding:12px 20px; border-radius:30px; font-size:1em; cursor:pointer; transition:all 0.3s ease; font-weight:bold; box-shadow:0 4px 15px rgba(0,0,0,0.3); }
+        button:hover { transform: translateY(-2px); box-shadow:0 6px 20px rgba(0,0,0,0.4); }
+        button:active { transform: translateY(0); }
+        select { padding:10px 12px; border-radius:8px; border:none; font-size:0.95em; }
+        .status { margin-top:15px; padding:15px; background: rgba(255,255,255,0.1); border-radius:10px; font-size:1.1em; }
+        .feature-list { list-style:none; margin-top:20px; }
+        .feature-list li { padding:15px; background: rgba(255,255,255,0.1); margin-bottom:10px; border-radius:10px; display:flex; align-items:center; gap:15px; }
+        .feature-list li::before { content:"✓"; background:#4ade80; color:#000; width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:bold; flex-shrink:0; }
+        .pulse { animation: pulse 2s ease-in-out infinite; }
+        @keyframes pulse { 0%,100% { opacity:1; } 50% { opacity:0.5; } }
+        .recording-indicator { display:inline-block; width:12px; height:12px; background:#ef4444; border-radius:50%; animation: blink 1s ease-in-out infinite; margin-right:8px; }
+        @keyframes blink { 0%,100% { opacity:1; } 50% { opacity:0.3; } }
+        .small { font-size:0.9em; opacity:0.9; }
+        .muted { color: rgba(255,255,255,0.75); }
+        @media (max-width:768px) {
+            h1 { font-size:2em; }
+            .video-demo { grid-template-columns:1fr; }
+            .section { padding:25px; }
+            .nav-menu { gap:5px; }
+            .nav-item { padding:10px 15px; font-size:0.9em; }
+            .logo { font-size:1.3em; }
+            .controls { flex-direction:column; align-items:flex-start; }
+        }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <div class="nav-container">
+        <div class="logo">ASL Tech</div>
+        <ul class="nav-menu">
+            <a href="index.html" class="nav-item">Home</a>
+            <a href="asl-alphabet.html" class="nav-item">ASL Alphabet</a>
+            <a href="video-call.html" class="nav-item active">Video Call</a>
+            <a href="sign-detection.html" class="nav-item">Sign Detection</a>
+        </ul>
+    </div>
+</nav>
+
+<div class="container">
+    <header>
+        <h1><span class="icon"></span> Real-Time Video Call Translation</h1>
+        <p class="subtitle">Seamless ASL to English Translation</p>
+    </header>
+
+    <div class="section">
+        <h2><span class="icon"></span> Live Translation Demo</h2>
+        <p>AI-powered ASL translation enables seamless communication during video calls.</p>
+
+        <div class="demo-container">
+            <div id="root"></div>
+
+            <!-- subtitle bar: shows translated text + original -->
+            <div id="subtitleBar" class="sub">
+                <div id="translatedText">Captions will appear here...</div>
+                <div id="origText" class="small muted" style="margin-top:8px;"></div>
+            </div>
+
+            <!-- small controls -->
+            <div class="controls" style="margin-top:12px;">
+                <button id="startCaptionsBtn">Start Continuous Captions</button>
+                <button id="stopCaptionsBtn" style="display:none;">Stop Captions</button>
+
+                <label for="targetLangSelect" class="small muted" style="align-self:center;">Translate to:</label>
+                <select id="targetLangSelect" title="Target language">
+                    <option value="en">English</option>
+                    <option value="hi">Hindi</option>
+                    <option value="es">Spanish</option>
+                    <option value="fr">French</option>
+                    <option value="de">German</option>
+                    <option value="ar">Arabic</option>
+                    <option value="pt">Portuguese</option>
+                </select>
+
+                <button id="shareSysAudioBtn">Share System Audio (optional)</button>
+                <button id="stopSysAudioBtn" style="display:none;">Stop System Audio</button>
+            </div>
+
+            <div id="video-status" class="status" style="margin-top:12px;">
+                <strong>Status:</strong> <span class="muted">Captions stopped</span>
+            </div>
+
+            <div id="sysAudioNote" class="small muted" style="margin-top:8px;">
+                Tip: To transcribe audio playing from your PC, click "Share System Audio" and enable "Share system audio" in the browser prompt (if available). Browser security may limit direct feeding of that stream into the Web Speech API; for full capture you may need to use OS-level loopback or server-side STT.
+            </div>
+
+            <ul class="feature-list">
+                <li>Real-time hand tracking with 21 landmark points per hand</li>
+                <li>Facial expression recognition for grammatical context</li>
+                <li>Motion analysis for dynamic signs and transitions</li>
+                <li>Contextual understanding for accurate translations</li>
+                <li>Low latency for natural conversations</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<!-- Zego prebuilt SDK -->
+<script src="https://unpkg.com/@zegocloud/zego-uikit-prebuilt/zego-uikit-prebuilt.js"></script>
+
+<script>
+/*
+  Now includes:
+  - Continuous browser SpeechRecognition
+  - LibreTranslate (public endpoint) translation of final transcripts
+  - Language selector, rate-limiting & race-safety for translation responses
+  Notes: LibreTranslate public instances may have rate limits or CORS rules.
+*/
+
+window.onload = function () {
+    // ---------- utils ----------
+    function getUrlParams(url) {
+        let urlStr = url.split('?')[1] || '';
+        const urlSearchParams = new URLSearchParams(urlStr);
+        const result = Object.fromEntries(urlSearchParams.entries());
+        return result;
+    }
+
+    // ---------- Zego setup (unchanged) ----------
+    const roomID = getUrlParams(window.location.href)['roomID'] || (Math.floor(Math.random() * 10000) + "");
+    const userID = Math.floor(Math.random() * 10000) + "";
+    const userName = "userName" + userID;
+    const appID = 517984485;
+    const serverSecret = "b70af882b601e72a900d8f4e6a67ce9b";
+    const kitToken = ZegoUIKitPrebuilt.generateKitTokenForTest(appID, serverSecret, roomID, userID, userName);
+
+    const zp = ZegoUIKitPrebuilt.create(kitToken);
+    zp.joinRoom({
+        container: document.querySelector("#root"),
+        sharedLinks: [{
+            name: 'Personal link',
+            url: window.location.protocol + '//' + window.location.host  + window.location.pathname + '?roomID=' + roomID,
+        }],
+        scenario: { mode: ZegoUIKitPrebuilt.VideoConference },
+        turnOnMicrophoneWhenJoining: true,
+        turnOnCameraWhenJoining: true,
+        showMyCameraToggleButton: true,
+        showMyMicrophoneToggleButton: true,
+        showAudioVideoSettingsButton: true,
+        showScreenSharingButton: true,
+        showTextChat: true,
+        showUserList: true,
+        maxUsers: 2,
+        layout: "Auto",
+        showLayoutButton: false,
+    });
+
+    // ---------- subtitle / transcription elements ----------
+    const translatedEl = document.getElementById('translatedText');
+    const origEl = document.getElementById('origText');
+    const statusEl = document.getElementById('video-status');
+    const startBtn = document.getElementById('startCaptionsBtn');
+    const stopBtn = document.getElementById('stopCaptionsBtn');
+    const shareSysBtn = document.getElementById('shareSysAudioBtn');
+    const stopSysBtn = document.getElementById('stopSysAudioBtn');
+    const sysAudioNote = document.getElementById('sysAudioNote');
+    const targetLangSelect = document.getElementById('targetLangSelect');
+
+    // BroadcastChannel (local tab comms)
+    const bcName = 'transcribe_room_' + (getUrlParams(window.location.href)['roomID'] || roomID);
+    let bc = null;
+    try { bc = new BroadcastChannel(bcName); } catch (e) { bc = null; }
+
+    // ---------- SpeechRecognition ----------
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition || null;
+    let recognition = null;
+    let keepListening = false;
+    let restartAttempts = 0;
+
+    function logStatus(text) {
+        statusEl.innerHTML = '<strong>Status:</strong> ' + text;
+    }
+
+    // ---------- Translation helpers (LibreTranslate) ----------
+    // public LibreTranslate endpoint (no API key) - can be swapped for your own server/paid API
+    const TRANSLATE_ENDPOINTS = [
+        'https://libretranslate.de/translate',
+        'https://translate.argosopentech.com/translate'
+    ];
+
+    // race safety: only apply translation if requestId matches lastRequestId
+    let lastRequestId = 0;
+
+    async function translateText(text, target) {
+        if (!text || !target) return null;
+        // prefer json POST
+        const body = { q: text, source: 'auto', target: target, format: 'text' };
+
+        for (const endpoint of TRANSLATE_ENDPOINTS) {
+            try {
+                const res = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+                if (!res.ok) throw new Error('translate fetch failed: ' + res.status);
+                const data = await res.json();
+                // LibreTranslate shape: { translatedText: "..." } or { translation: "..." }
+                if (data.translatedText) return data.translatedText;
+                if (data.translation) return data.translation;
+                // some instances return { result: "..." }
+                if (data.result) return data.result;
+                // fallback: if API returns translations array
+                if (data.data && data.data.translations && data.data.translations[0]) {
+                    return data.data.translations[0].translatedText || null;
+                }
+            } catch (e) {
+                console.warn('translate attempt failed for', endpoint, e);
+                // try next
+            }
+        }
+        return null;
+    }
+
+    // sets subtitle UI with translation + original
+    function setTranslatedSubtitle(translated, original) {
+        translatedEl.textContent = translated || original || '';
+        origEl.textContent = original ? ('Original: ' + original) : '';
+    }
+
+    // convenience: translate & update UI with race protection
+    async function translateAndSet(text, targetLang) {
+        const requestId = ++lastRequestId;
+        // show original immediately as feedback
+        setTranslatedSubtitle('Translating…', text);
+        let translated = null;
+        try {
+            translated = await translateText(text, targetLang);
+        } catch (e) {
+            console.warn('Translation error', e);
+        }
+        // if another request started meanwhile, ignore this result
+        if (requestId !== lastRequestId) return;
+        if (translated) {
+            setTranslatedSubtitle(translated, text);
+        } else {
+            // fallback: show original if translation not available
+            setTranslatedSubtitle(text, text);
+        }
+    }
+
+    // ---------- SpeechRecognition lifecycle ----------
+    function startRecognition() {
+        if (!SpeechRecognition) {
+            setTranslatedSubtitle('Speech recognition not supported in this browser.', '');
+            logStatus('<span class="muted">SpeechRecognition not available</span>');
+            return;
+        }
+        if (recognition) {
+            try { recognition.stop(); } catch (_) {}
+            recognition = null;
+        }
+
+        recognition = new SpeechRecognition();
+        recognition.lang = navigator.language || 'en-US';
+        recognition.interimResults = true;
+        recognition.continuous = true;
+        recognition.maxAlternatives = 1;
+
+        recognition.onstart = () => {
+            restartAttempts = 0;
+            logStatus('<span class="recording-indicator"></span><span style="color: #4ade80;">Listening (microphone)</span>');
+        };
+
+        let interim = '';
+        recognition.onresult = (event) => {
+            interim = '';
+            let finalTranscripts = [];
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const res = event.results[i];
+                const t = res[0] && res[0].transcript ? res[0].transcript : '';
+                if (res.isFinal) {
+                    finalTranscripts.push(t.trim());
+                } else {
+                    interim += t;
+                }
+            }
+
+            // show interim (raw, untranslated) while waiting for final
+            if (!finalTranscripts.length) {
+                // show interim raw while user speaks
+                setTranslatedSubtitle(interim || '', '');
+                return;
+            }
+
+            // handle final transcripts: join and translate
+            const joined = finalTranscripts.join(' ').trim();
+            // send original to room (you may choose to send translated instead)
+            try {
+                if (zp && typeof zp.sendRoomMessage === 'function') {
+                    zp.sendRoomMessage(JSON.stringify({ t: 'sub', text: joined }));
+                }
+            } catch (e) { /* ignore */ }
+
+            // broadcast locally via BroadcastChannel
+            if (bc) {
+                try { bc.postMessage({ text: joined }); } catch (e) {}
+            }
+
+            // translate and set (async)
+            const target = targetLangSelect.value || 'en';
+            translateAndSet(joined, target);
+        };
+
+        recognition.onerror = (ev) => {
+            console.warn('SpeechRecognition error', ev);
+            if (!keepListening) return;
+            setTimeout(() => tryRestartRecognition(), 300);
+        };
+
+        recognition.onend = () => {
+            if (!keepListening) {
+                logStatus('<span class="muted">Captions stopped</span>');
+                return;
+            }
+            tryRestartRecognition();
+        };
+
+        try {
+            recognition.start();
+        } catch (e) {
+            console.warn('recognition.start error', e);
+            setTimeout(() => {
+                try { recognition.start(); } catch (e2) { console.error('final start failure', e2); }
+            }, 500);
+        }
+    }
+
+    function tryRestartRecognition() {
+        if (!keepListening) return;
+        restartAttempts++;
+        if (restartAttempts > 10) {
+            restartAttempts = 0;
+            if (recognition) { try { recognition.abort(); } catch (_) {} recognition = null; }
+            startRecognition();
+            return;
+        }
+        try {
+            if (recognition) {
+                try { recognition.start(); } catch (e) {
+                    recognition = null;
+                    startRecognition();
+                }
+            } else {
+                startRecognition();
+            }
+        } catch (e) {
+            recognition = null;
+            setTimeout(() => startRecognition(), 400);
+        }
+    }
+
+    function startCaptions() {
+        if (!SpeechRecognition) {
+            setTranslatedSubtitle('Speech recognition not supported in this browser.', '');
+            return;
+        }
+        keepListening = true;
+        startBtn.style.display = 'none';
+        stopBtn.style.display = '';
+        startRecognition();
+    }
+
+    function stopCaptions() {
+        keepListening = false;
+        if (recognition) {
+            try { recognition.stop(); } catch (_) {}
+            try { recognition.abort(); } catch (_) {}
+            recognition = null;
+        }
+        startBtn.style.display = '';
+        stopBtn.style.display = 'none';
+        logStatus('<span class="muted">Captions stopped</span>');
+    }
+
+    startBtn.addEventListener('click', startCaptions);
+    stopBtn.addEventListener('click', stopCaptions);
+
+    // ---------- attempt to capture system audio (unchanged) ----------
+    let sysStream = null;
+    let sysAudioEl = null;
+    let sysRetryCount = 0;
+    const MAX_SYS_RETRIES = 6;
+
+    async function requestSystemAudio() {
+        try {
+            sysStream = await navigator.mediaDevices.getDisplayMedia({ audio: true, video: false });
+            sysRetryCount = 0;
+            handleSysStream(sysStream);
+            shareSysBtn.style.display = 'none';
+            stopSysBtn.style.display = '';
+        } catch (e) {
+            console.warn('System audio share denied / failed', e);
+            sysStream = null;
+            sysAudioNote.textContent = 'System audio share failed or was denied. You can use OS loopback (virtual audio cable) to expose system audio as a microphone for browser STT.';
+        }
+    }
+
+    function handleSysStream(stream) {
+        if (!sysAudioEl) {
+            sysAudioEl = document.createElement('audio');
+            sysAudioEl.id = 'sysAudioEl';
+            sysAudioEl.autoplay = true;
+            sysAudioEl.muted = false;
+            sysAudioEl.playsInline = true;
+            sysAudioEl.style.display = 'none';
+            document.body.appendChild(sysAudioEl);
+        }
+        sysAudioEl.srcObject = stream;
+        const tracks = stream.getAudioTracks();
+        if (tracks && tracks.length) {
+            tracks[0].onended = () => {
+                sysAudioNote.textContent = 'System audio sharing ended.';
+                stopSysAudio();
+                if (sysRetryCount < MAX_SYS_RETRIES) {
+                    sysRetryCount++;
+                    setTimeout(() => requestSystemAudio(), 1200 * sysRetryCount);
+                }
+            };
+        }
+        sysAudioNote.textContent = 'System audio being played locally. To get it transcribed in-browser, route system audio as a microphone (OS loopback) or send stream to server-side STT.';
+    }
+
+    function stopSysAudio() {
+        shareSysBtn.style.display = '';
+        stopSysBtn.style.display = 'none';
+        if (sysAudioEl) {
+            try { sysAudioEl.pause(); } catch (_) {}
+            sysAudioEl.srcObject = null;
+            sysAudioEl.remove();
+            sysAudioEl = null;
+        }
+        if (sysStream) {
+            for (const t of sysStream.getTracks()) {
+                try { t.stop(); } catch (_) {}
+            }
+            sysStream = null;
+        }
+    }
+
+    shareSysBtn.addEventListener('click', () => { requestSystemAudio(); });
+    stopSysBtn.addEventListener('click', () => { stopSysAudio(); });
+
+    // ---------- zp room messages -> local subtitle display ----------
+    try {
+        if (typeof zp.on === 'function') {
+            zp.on('roomMessageReceived', (msgs) => {
+                const list = Array.isArray(msgs) ? msgs : [msgs];
+                for (const m of list) {
+                    const content = typeof m.message === 'string' ? m.message : (m.content || m.text || m);
+                    if (!content) continue;
+                    let data = null;
+                    if (typeof content === 'string') {
+                        try { data = JSON.parse(content); } catch (_) { data = null; }
+                    } else if (typeof content === 'object') {
+                        data = content;
+                    }
+                    if (data && data.t === 'sub' && data.text) {
+                        // show original text from remote peer, and attempt to translate locally
+                        translateAndSet(String(data.text), targetLangSelect.value || 'en');
+                        setTimeout(() => { /* keep visible */ }, 4000);
+                    }
+                }
+            });
+        }
+    } catch (e) { console.warn('zp event hook failed', e); }
+
+    // BroadcastChannel receive (from other local tabs)
+    if (bc) {
+        bc.onmessage = (ev) => {
+            try {
+                if (ev && ev.data && ev.data.text) {
+                    translateAndSet(String(ev.data.text), targetLangSelect.value || 'en');
+                }
+            } catch (e) {}
+        };
+    }
+
+    // Expose debug helpers
+    window._transcription = {
+        startCaptions,
+        stopCaptions,
+        requestSystemAudio,
+        stopSysAudio,
+        get isListening() { return keepListening; }
+    };
+};
+</script>
+</body>
+</html>
