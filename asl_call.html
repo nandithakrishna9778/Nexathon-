@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>ASL Video Call with Live Captions</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f4f4;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        #local-player, #remote-player {
+            width: 45%;
+            height: 300px;
+            background: #000;
+            margin: 10px;
+        }
+        .video-container {
+            display: flex;
+            width: 100%;
+            justify-content: center;
+            gap: 20px;
+        }
+        #captions {
+            margin-top: 20px;
+            font-size: 20px;
+            background: #222;
+            color: #fff;
+            padding: 15px;
+            border-radius: 8px;
+            width: 80%;
+            text-align: center;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h2>ASL Real-Time Video Call + Voice Captions</h2>
+    <div class="video-container">
+        <div id="local-player"></div>
+        <div id="remote-player"></div>
+    </div>
+
+    <button id="joinBtn">Join Call</button>
+    <button id="leaveBtn" disabled>Leave Call</button>
+
+    <div id="captions">🎤 Live Captions: (speak to test)</div>
+
+    <!-- Agora SDK -->
+    <script src="https://download.agora.io/sdk/release/AgoraRTC_N.js"></script>
+
+    <script>
+        const APP_ID = "9cf7c826ce75495a8d240a869c016f41";
+        const TOKEN = "007eJxTYMiZIvchrE/c9x1H0EcRp2Yu86kdPRt2LY8vKbm0kvfJxdMKDJbJaebJFkZmyanmpiaWpokWKUYmBokWZpbJBoZmaSaGLYqMmQ2BjAxloduYGBkgEMTnZihJLS5JzkjMy0vNYWAAAP2VIUM=";
+        const CHANNEL = "testchannel";
+
+        const client = AgoraRTC.createClient({ mode: "rtc", codec: "vp8" });
+        let localTrack, remoteTrack;
+
+        document.getElementById("joinBtn").onclick = async () => {
+            const uid = await client.join(APP_ID, CHANNEL, TOKEN, null);
+            localTrack = await AgoraRTC.createMicrophoneAndCameraTracks();
+
+            localTrack[1].play("local-player");
+            await client.publish(localTrack);
+
+            client.on("user-published", async (user, mediaType) => {
+                await client.subscribe(user, mediaType);
+                if (mediaType === "video") {
+                    user.videoTrack.play("remote-player");
+                }
+                if (mediaType === "audio") {
+                    user.audioTrack.play();
+                }
+            });
+
+            startTranscription();
+            document.getElementById("joinBtn").disabled = true;
+            document.getElementById("leaveBtn").disabled = false;
+        };
+
+        document.getElementById("leaveBtn").onclick = async () => {
+            localTrack.forEach(track => track.stop() && track.close());
+            await client.leave();
+            document.getElementById("joinBtn").disabled = false;
+            document.getElementById("leaveBtn").disabled = true;
+            document.getElementById("captions").innerText = "🎤 Live Captions: ";
+        };
+
+        // Speech to Text Live Captions
+        function startTranscription() {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            if (!SpeechRecognition) {
+                document.getElementById("captions").innerText = "Speech Recognition not supported in this browser";
+                return;
+            }
+
+            const recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = "en-US";
+
+            recognition.onresult = (event) => {
+                const transcript = Array.from(event.results)
+                    .map(result => result[0].transcript)
+                    .join("");
+                document.getElementById("captions").innerText = "🎤 " + transcript;
+            };
+
+            recognition.start();
+        }
+    </script>
+</body>
+</html>
+\
